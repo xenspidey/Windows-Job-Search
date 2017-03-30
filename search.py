@@ -3,7 +3,7 @@ import glob
 import re
 import os
 from tkinter import *
-from tkinter.tix import ComboBox
+from tkinter.ttk import Combobox
 from tkinter.filedialog import askopenfilenames, askopenfilename, asksaveasfilename
 import json
 # todo 
@@ -19,13 +19,23 @@ def settings():
     def read_settings():
         '''read settings from file'''
         with open('config.json', 'w+') as f:
-            config = json.load(f)
-            value_xlFile = config['xlfile']
-            value_xlSheet = config['xlsheet']
+            try:
+                config = json.load(f)
+            except:
+                print('fail_0')
+                write_settings('', '')
+                return
+            try:
+                value_xlFile = config['xlfile']
+                value_xlSheet = config['xlsheet']
+                write_settings('', '')
+                return
+            except:
+                print('fail')
 
-    def write_settings():
+    def write_settings(xlfile, xlsheet):
         '''write config settings to file'''
-        config = {'xlfile': '', 'xlsheet': ''}
+        config = {'xlfile': xlfile, 'xlsheet': xlsheet}
         with open('config.json', 'w+') as f:
             json.dump(config, f)
 
@@ -40,23 +50,23 @@ def settings():
             for sheet in sheets:
                 combo_sheets.insert(0, sheet)
 
+        def save():
+            write_settings(text_xlFile.get(), combo_sheets.get())
 
         Settingsdlg = Tk()
         Settingsdlg.geometry('300x200')
-        text_xlFile = Entry(parent=Settingsdlg)
-        button_Browse = Button(Settingsdlg, text='Browse...', command=browse())
-        combo_sheets = ComboBox(parent=Settingsdlg)
+        text_xlFile = Entry(Settingsdlg)
+        button_Browse = Button(Settingsdlg, text='Browse...', command=lambda: browse())
+        button_Save = Button(Settingsdlg, text='Save', command=lambda: save())
+        combo_sheets = Combobox(Settingsdlg)
         text_xlFile.pack(pady=10, padx=10)
         button_Browse.pack(pady=10, padx=10)
         combo_sheets.pack(pady=10, padx=10)
+        button_Save.pack(pady=10, padx=10)
         Settingsdlg.mainloop()
 
 
-    try: 
-        read_settings()
-    except:
-        write_settings()
-        read_settings()
+    read_settings()
 
     if value_xlFile == '' or value_xlSheet == '':
         showSettingsdlg()
